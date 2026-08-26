@@ -1,0 +1,10 @@
+{
+  "delete_empty_folders": true,
+  "delete_after_days": 30,
+  "delete_ignore": [
+    "Audio",
+    "Videos",
+    "Images",
+    "Documents"
+  ]
+}
