@@ -31,6 +31,10 @@ blue = "\033[34m"
 
 folder = os.path.join(os.path.expanduser('~'), 'Downloads')
 
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print('\033[2J\033[H', end='', flush=True)
+
 categories = {
     'Images': ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff'],
     'Documents': ['.pdf', '.doc', '.docx', '.txt', '.ppt', '.pptx', '.xls', '.xlsx'],
@@ -209,11 +213,13 @@ def Settings_Menu():
 
 # ===== Main menu =====
 while True:
+    clear_screen()
     print(f"\n{Yellow}===== Downloads Organizer ====={Reset}")
     print(f"{White}1. Organize now{Reset}")
     print(f"{White}2. Clean up old files{Reset}")
     print(f"{White}3. Settings{Reset}")
-    print(f"{White}4. Quit{Reset}")
+    print(f"{White}4. Open Downloads folder{Reset}")
+    print(f"{White}5. Quit{Reset}")
 
     choice = input(f"{Yellow}Choose: {Reset}")
 
@@ -224,7 +230,12 @@ while True:
     elif choice == '3':
         Settings_Menu()
     elif choice == '4':
+        os.startfile(folder)
+    elif choice == '5':
         print(f"{Green}Bye!{Reset}")
         break
     else:
-        print(f"{Red}Pick 1-4.{Reset}")
+        print(f"{Red}Pick 1-5.{Reset}")
+
+    if choice != '5':
+        input(f"\n{White}Press Enter to return to the menu...{Reset}")
