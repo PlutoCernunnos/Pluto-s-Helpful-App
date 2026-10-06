@@ -1,6 +1,7 @@
 import os
 import time
 import json
+import ctypes
 
 settings_file = 'Organizer_settings.json'
 
@@ -56,6 +57,29 @@ def get_free_name(destination, filename):
         new_path = os.path.join(destination, f"{name} ({counter}){ext}")
         counter += 1
     return new_path
+
+def move_to_recycle_bin(file_path):
+    class SHFILEOPSTRUCTW(ctypes.Structure):
+        _fields_ = [
+            ('hwnd', ctypes.c_void_p),
+            ('wFunc', ctypes.c_uint),
+            ('pFrom', ctypes.c_wchar_p),
+            ('pTo', ctypes.c_wchar_p),
+            ('fFlags', ctypes.c_ushort),
+            ('fAnyOperationsAborted', ctypes.c_bool),
+            ('hNameMappings', ctypes.c_void_p),
+            ('lpszProgressTitle', ctypes.c_wchar_p),
+        ]
+
+    shell_operation = ctypes.windll.shell32.SHFileOperationW
+    operation = SHFILEOPSTRUCTW(
+        wFunc=3,
+        pFrom=file_path + '\0',
+        fFlags=0x0040 | 0x0010,
+    )
+    result = shell_operation(ctypes.byref(operation))
+    if result != 0:
+        raise OSError(f"Could not move '{file_path}' to the Recycle Bin (error {result})")
 
 def Organize_Files():
     report = {}
@@ -162,8 +186,8 @@ def Cleanup_old_files():
             answer = input(f"{Red}{category}: delete all {len(old_files)} old files? (y/n): {Reset}")
             if answer.lower() == 'y':
                 for file_path in old_files:
-                    os.remove(file_path)
-                    print(f"{Red}Deleted {os.path.basename(file_path)}{Reset}")
+                    move_to_recycle_bin(file_path)
+                    print(f"{Red}Moved {os.path.basename(file_path)} to the Recycle Bin{Reset}")
             else:
                 answer = input(f"{Red}Delete individual files? (y/n): {Reset}")
                 if answer.lower() == 'y':
@@ -172,8 +196,8 @@ def Cleanup_old_files():
                         size = os.path.getsize(file_path) / (1024 * 1024)
                         answer = input(f"{Red}Delete {filename} ({size:.2f} MB)? (y/n): {Reset}")
                         if answer.lower() == 'y':
-                            os.remove(file_path)
-                            print(f"{Red}Deleted {filename}{Reset}")
+                            move_to_recycle_bin(file_path)
+                            print(f"{Red}Moved {filename} to the Recycle Bin{Reset}")
             del folders_with_old[category]
    
 
